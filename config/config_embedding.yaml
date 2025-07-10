@@ -30,10 +30,7 @@ providers:
   ollama:
     api_endpoint_env: OLLAMA_URL
     model: qwen3:0.6b
-  qwen_openai:
-    api_key_env: sk-8d92269162214b3da44e786fde398ae6
-    api_endpoint_env: https://dashscope.aliyuncs.com/compatible-mode/v1
-    model: text-embedding-v3
+
 
   elasticsearch:
     # Elasticsearch endpoint (localhost or remote URL with Elastic Cloud/Serverless)
