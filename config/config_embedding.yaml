@@ -22,14 +22,14 @@ providers:
     api_version_env: "2024-10-01"
     model: snowflake-arctic-embed-m-v1.5
   
-<<<<<<< HEAD
-  ollama:
-    api_endpoint_env: OLLAMA_URL
-    model: qwen3:0.6b
   qwen_openai:
     api_key_env: sk-8d92269162214b3da44e786fde398ae6
     api_endpoint_env: https://dashscope.aliyuncs.com/compatible-mode/v1
     model: text-embedding-v3
+  
+  ollama:
+    api_endpoint_env: OLLAMA_URL
+    model: qwen3:0.6b
 
   elasticsearch:
     # Elasticsearch endpoint (localhost or remote URL with Elastic Cloud/Serverless)
@@ -45,9 +45,3 @@ providers:
         num_allocations: 1
         num_threads: 1
         model_id: .multilingual-e5-small_linux-x86_64
-=======
-  qwen_openai:
-    api_key_env: sk-8d92269162214b3da44e786fde398ae6
-    api_endpoint_env: https://dashscope.aliyuncs.com/compatible-mode/v1
-    model: text-embedding-v3
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
