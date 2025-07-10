@@ -20,7 +20,7 @@ from urllib.parse import urlparse
 from typing import List, Dict, Any, Tuple, Union, Optional
 
 from core.config import CONFIG
-from core.embedding import batch_get_embeddings
+from embedding_providers.embedding import batch_get_embeddings
 from data_loading.db_load_utils import (
     read_file_lines,
     prepare_documents_from_json,
