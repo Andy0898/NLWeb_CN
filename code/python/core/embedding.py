@@ -23,12 +23,8 @@ _provider_locks = {
     "gemini": threading.Lock(),
     "azure_openai": threading.Lock(),
     "qwen_openai": threading.Lock(),
-<<<<<<< HEAD
     "snowflake": threading.Lock(),
     "elasticsearch": threading.Lock()
-=======
-    "snowflake": threading.Lock()
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
 }
 
 async def get_embedding(
@@ -125,7 +121,6 @@ async def get_embedding(
             )
             logger.debug(f"Azure embeddings received, dimension: {len(result)}")
             return result
-<<<<<<< HEAD
         
         if provider == "ollama":
             logger.debug("Getting Ollama embeddings")
@@ -139,8 +134,6 @@ async def get_embedding(
             logger.debug(f"Ollama embeddings received, dimension: {len(result)}")
             return result
             
-=======
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
 
         if provider == "qwen_openai":
             logger.debug("Getting Qwen OpenAI embeddings")
