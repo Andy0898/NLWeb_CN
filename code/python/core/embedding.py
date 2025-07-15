@@ -138,7 +138,7 @@ async def get_embedding(
         if provider == "qwen_openai":
             logger.debug("Getting Qwen OpenAI embeddings")
             # Import here to avoid potential circular imports
-            from embedding.qwen_embedding import get_qwen_embedding
+            from embedding_providers.qwen_embedding import get_qwen_embedding
             result = await asyncio.wait_for(
                 get_qwen_embedding(text, model=model_id),
                 timeout=timeout
@@ -250,7 +250,7 @@ async def batch_get_embeddings(
         # Provider-specific batch implementations with timeout handling
         if provider == "qwen_openai":
             logger.debug("Getting Qwen OpenAI batch embeddings")
-            from embedding.qwen_embedding import get_qwen_batch_embeddings
+            from embedding_providers.qwen_embedding import get_qwen_batch_embeddings
             result = await asyncio.wait_for(
                 get_qwen_batch_embeddings(texts, model=model_id),
                 timeout=timeout
