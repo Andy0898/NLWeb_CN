@@ -14,11 +14,6 @@ from openai import AsyncOpenAI
 from core.config import CONFIG
 from llm_providers.llm_provider import LLMProvider
 from misc.logger.logging_config_helper import get_configured_logger, LogLevel
-=======
-from config.config import CONFIG
-from llm.llm_provider import LLMProvider
-from utils.logging_config_helper import get_configured_logger, LogLevel
->>>>>>> 22c77ad (1.支持Qwen的embedding和llm):code/llm/qwen_openai.py
 
 logger = get_configured_logger("qwen_llm")
 
