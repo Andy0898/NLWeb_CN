@@ -435,7 +435,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
 
     except Exception as e:
         print(f"Fatal error processing XLSX file: {str(e)}")
-        return documents 
+        return documents
               
 async def process_csv_file(file_path: str, site: str) -> List[Dict[str, Any]]:
     """
