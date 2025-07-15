@@ -23,7 +23,6 @@ _provider_locks = {
     "gemini": threading.Lock(),
     "azure_openai": threading.Lock(),
     "qwen_openai": threading.Lock(),
-    "qwen_openai": threading.Lock(),
     "snowflake": threading.Lock(),
     "elasticsearch": threading.Lock()
 }
