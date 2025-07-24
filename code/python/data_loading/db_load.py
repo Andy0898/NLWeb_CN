@@ -1228,7 +1228,6 @@ async def main():
                         help="Treat the input file path as a directory containing files to process.")
     parser.add_argument("file_path", nargs="?", help="Path to the input file or URL or directory containing files to process")
     parser.add_argument("site", help="Site identifier")
-    parser.add_argument("file_path", nargs="?", help="Path to the input file or URL")
     parser.add_argument("--batch-size", type=int, default=100,
                         help="Batch size for processing and uploading")
     parser.add_argument("--database", type=str, default=None,
