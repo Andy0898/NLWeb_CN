@@ -408,6 +408,13 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
                     if col in row_data and row_data[col]:
                         name = str(row_data[col])
                         break
+                # 再模糊匹配（如 "Course Name", "Product Name" 等）
+                if not name:
+                    for col in df.columns:
+                        col_lc = col.lower().replace(" ", "")
+                        if ("name" in col_lc or "title" in col_lc) and row_data.get(col):
+                            name = str(row_data[col])
+                            break
                 if not name:
                     name = f"Row {index} from {os.path.basename(file_path)}"
 
@@ -1221,6 +1228,7 @@ async def main():
                         help="Treat the input file path as a directory containing files to process.")
     parser.add_argument("file_path", nargs="?", help="Path to the input file or URL or directory containing files to process")
     parser.add_argument("site", help="Site identifier")
+    parser.add_argument("file_path", nargs="?", help="Path to the input file or URL")
     parser.add_argument("--batch-size", type=int, default=100,
                         help="Batch size for processing and uploading")
     parser.add_argument("--database", type=str, default=None,
@@ -1273,4 +1281,15 @@ async def main():
     await process_normal_path(args.file_path, args.site, args.batch_size, args.delete_site, args.force_recompute, args.database)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except SystemExit as e:
+        # Argparse uses SystemExit, which is fine. We only worry about other exceptions.
+        if e.code != 0:
+            print(f"Execution stopped with exit code {e.code}.")
+    except KeyboardInterrupt:
+        print("\nProcess interrupted by user.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        traceback.print_exc()
+        sys.exit(1)

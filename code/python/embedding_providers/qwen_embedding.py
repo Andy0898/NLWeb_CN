@@ -13,9 +13,9 @@ import asyncio
 import threading
 from typing import List, Optional
 from openai import OpenAI
-from config.config import CONFIG
+from core.config import CONFIG
 
-from utils.logging_config_helper import get_configured_logger, LogLevel
+from misc.logger.logging_config_helper import get_configured_logger, LogLevel
 logger = get_configured_logger("qwen_oai_embedding")
 
 # Qwen OpenAI embedding API 单次最大支持10条

@@ -11,9 +11,9 @@ import json
 import re
 import asyncio
 from openai import AsyncOpenAI
-from config.config import CONFIG
-from llm.llm_provider import LLMProvider
-from utils.logging_config_helper import get_configured_logger, LogLevel
+from core.config import CONFIG
+from llm_providers.llm_provider import LLMProvider
+from misc.logger.logging_config_helper import get_configured_logger, LogLevel
 
 logger = get_configured_logger("qwen_llm")
 
