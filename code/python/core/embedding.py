@@ -23,6 +23,7 @@ _provider_locks = {
     "gemini": threading.Lock(),
     "azure_openai": threading.Lock(),
     "qwen_openai": threading.Lock(),
+    "qwen_openai": threading.Lock(),
     "snowflake": threading.Lock(),
     "elasticsearch": threading.Lock()
 }
@@ -274,6 +275,24 @@ async def batch_get_embeddings(
                 logger.error(f"Qwen OpenAI batch embedding failed: {e}")
                 raise
         
+        if provider == "qwen_openai":
+            logger.debug("Getting Qwen OpenAI batch embeddings")
+            try:
+                from embedding_providers.qwen_embedding import get_qwen_batch_embeddings
+            except ImportError as e:
+                logger.error(f"Qwen batch embedding provider import failed: {e}")
+                raise ImportError("Qwen batch embedding provider not installed or import failed")
+            try:
+                result = await asyncio.wait_for(
+                    get_qwen_batch_embeddings(texts, model=model_id),
+                    timeout=timeout
+                )
+                logger.debug(f"Qwen OpenAI batch embeddings received, count: {len(result)}")
+                return result
+            except Exception as e:
+                logger.error(f"Qwen OpenAI batch embedding failed: {e}")
+                raise
+        
         if provider == "openai":
             # Use OpenAI's batch embedding API
             logger.debug("Getting OpenAI batch embeddings")
@@ -350,6 +369,12 @@ async def batch_get_embeddings(
         logger.debug(f"No specific batch implementation for {provider}, processing sequentially")
         results = []
         for text in texts:
+            try:
+                embedding = await get_embedding(text, provider, model)
+                results.append(embedding)
+            except Exception as e:
+                logger.error(f"Failed to get embedding for text: {e}")
+                results.append([])
             try:
                 embedding = await get_embedding(text, provider, model)
                 results.append(embedding)
