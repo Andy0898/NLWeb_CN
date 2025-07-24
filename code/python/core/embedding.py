@@ -123,15 +123,23 @@ async def get_embedding(
             return result
 
         if provider == "qwen_openai":
-            logger.debug("Getting Qwen OpenAI embeddings")
-            # Import here to avoid potential circular imports
-            from embedding_providers.qwen_embedding import get_qwen_embedding
-            result = await asyncio.wait_for(
-                get_qwen_embedding(text, model=model_id),
-                timeout=timeout
-            )
-            logger.debug(f"Qwen OpenAI embeddings received, dimension: {len(result)}")
-            return result
+            logger.debug("Getting Qwen OpenAI embeddings")            
+            try:
+                # Import here to avoid potential circular imports
+                from embedding_providers.qwen_embedding import get_qwen_embedding
+            except ImportError as e:
+                logger.error(f"Qwen embedding provider import failed: {e}")
+                raise ImportError("Qwen embedding provider not installed or import failed")
+            try:
+                result = await asyncio.wait_for(
+                    get_qwen_embedding(text, model=model_id),
+                    timeout=timeout
+                )
+                logger.debug(f"Qwen OpenAI embeddings received, dimension: {len(result)}")
+                return result
+            except Exception as e:
+                logger.error(f"Qwen OpenAI embedding failed: {e}")
+                raise
         
         if provider == "snowflake":
             logger.debug("Getting Snowflake embeddings")
@@ -237,13 +245,21 @@ async def batch_get_embeddings(
         # Provider-specific batch implementations with timeout handling
         if provider == "qwen_openai":
             logger.debug("Getting Qwen OpenAI batch embeddings")
-            from embedding_providers.qwen_embedding import get_qwen_batch_embeddings
-            result = await asyncio.wait_for(
-                get_qwen_batch_embeddings(texts, model=model_id),
-                timeout=timeout
-            )
-            logger.debug(f"Qwen OpenAI batch embeddings received, count: {len(result)}")
-            return result
+            try:
+                from embedding_providers.qwen_embedding import get_qwen_batch_embeddings
+            except ImportError as e:
+                logger.error(f"Qwen batch embedding provider import failed: {e}")
+                raise ImportError("Qwen batch embedding provider not installed or import failed")
+            try:
+                result = await asyncio.wait_for(
+                    get_qwen_batch_embeddings(texts, model=model_id),
+                    timeout=timeout
+                )
+                logger.debug(f"Qwen OpenAI batch embeddings received, count: {len(result)}")
+                return result
+            except Exception as e:
+                logger.error(f"Qwen OpenAI batch embedding failed: {e}")
+                raise
         
         if provider == "openai":
             # Use OpenAI's batch embedding API
@@ -311,8 +327,12 @@ async def batch_get_embeddings(
         logger.debug(f"No specific batch implementation for {provider}, processing sequentially")
         results = []
         for text in texts:
-            embedding = await get_embedding(text, provider, model)
-            results.append(embedding)
+            try:
+                embedding = await get_embedding(text, provider, model)
+                results.append(embedding)
+            except Exception as e:
+                logger.error(f"Failed to get embedding for text: {e}")
+                results.append([])
         
         return results
         

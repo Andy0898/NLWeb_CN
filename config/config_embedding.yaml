@@ -1,5 +1,4 @@
 preferred_provider: qwen_openai
-preferred_provider: qwen_openai
 
 providers:
   openai:
