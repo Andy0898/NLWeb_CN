@@ -14,6 +14,7 @@ import threading
 from typing import List, Optional
 from openai import OpenAI
 from core.config import CONFIG
+
 from misc.logger.logging_config_helper import get_configured_logger, LogLevel
 logger = get_configured_logger("qwen_oai_embedding")
 

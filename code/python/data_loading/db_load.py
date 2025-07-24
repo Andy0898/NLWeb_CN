@@ -377,12 +377,12 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
     Returns:
         文档对象列表
 =======
-    ���� Excel �ļ���.xlsx����תΪ�ĵ������б�
+    ���� Excel �ļ���.xlsx����תΪ�ĵ������б�
     Args:
-        file_path: Excel �ļ�·��
-        site: վ���ʶ
+        file_path: Excel �ļ�·��
+        site: վ���ʶ
     Returns:
-        �ĵ������б�
+        �ĵ������б�
 >>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
     """
     print(f"Processing XLSX file: {file_path}")
@@ -394,7 +394,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
 <<<<<<< HEAD
         df = pd.read_excel(file_path, dtype=str)  # 读为字符串，避免类型问题
 =======
-        df = pd.read_excel(file_path, dtype=str)  # ��Ϊ�ַ�����������������
+        df = pd.read_excel(file_path, dtype=str)  # ��Ϊ�ַ�����������������
 >>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
         if df.empty:
             print(f"Warning: XLSX file {file_path} is empty.")
@@ -406,7 +406,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
 <<<<<<< HEAD
                 # 尝试提取 url/id 字段
 =======
-                # ������ȡ url/id �ֶ�
+                # ������ȡ url/id �ֶ�
 >>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
                 url = None
                 for col in ['url', 'URL', 'link', 'Link', 'id', 'ID', 'identifier']:
@@ -425,7 +425,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
                 # תΪ JSON
                 json_data = json.dumps(row_data, ensure_ascii=False)
 
-                # ������ȡ name/title �ֶ�
+                # ������ȡ name/title �ֶ�
 >>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
                 name = None
                 for col in ['name', 'Name', 'title', 'Title', 'heading', 'Heading']:
@@ -445,7 +445,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
 <<<<<<< HEAD
                 # 组装文档对象
 =======
-                # ��װ�ĵ�����
+                # ��װ�ĵ�����
 >>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
                 document = {
                     "id": str(hash(url) % (2**63)),
@@ -1258,7 +1258,6 @@ async def main():
                         help="Treat the input file as a list of URLs to process (one URL per line). The list file itself can be local or a URL.")
     parser.add_argument("--directory", action="store_true",
                         help="Treat the input file path as a directory containing files to process.")
-    parser.add_argument("file_path", nargs="?", help="Path to the input file or URL or directory containing files to process")
     parser.add_argument("site", help="Site identifier")
     parser.add_argument("--batch-size", type=int, default=100,
                         help="Batch size for processing and uploading")
