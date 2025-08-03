@@ -30,6 +30,18 @@
             }
         },
         {
+            "name": "Python Debugger: aiohttp_server",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "webserver.aiohttp_server",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/code/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/code/python"
+            }
+        },
+        {
             "name": "Python Debugger: current file with args",
             "type": "debugpy",
             "request": "launch",

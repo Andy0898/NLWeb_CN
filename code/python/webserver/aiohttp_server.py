@@ -164,15 +164,18 @@ class AioHTTPServer:
         ssl_context = self._setup_ssl_context()
         
         # Create site
-        self.site = web.TCPSite(
-            self.runner,
-            self.config['server']['host'],
-            self.config['port'],
-            ssl_context=ssl_context,
-            backlog=128,
-            reuse_address=True,
-            reuse_port=reuse_port_supported    # Reuse port is not supported by default on Windows and will cause issues
-        )
+        site_kwargs = {
+            "runner": self.runner,
+            "host": self.config['server']['host'],
+            "port": self.config['port'],
+            "ssl_context": ssl_context,
+            "backlog": 128,
+            "reuse_address": True,
+        }
+        if sys.platform != "win32":
+            site_kwargs["reuse_port"] = True
+
+        self.site = web.TCPSite(**site_kwargs)
         
         await self.site.start()
         
