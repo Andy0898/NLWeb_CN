@@ -13,7 +13,7 @@ from core.utils.utils import get_param
 logger = logging.getLogger(__name__)
 
 
-def setup_api_routes(app: web.Application):
+def  setup_api_routes(app: web.Application):
     """Setup core API routes"""
     # Query endpoints
     app.router.add_get('/ask', ask_handler)

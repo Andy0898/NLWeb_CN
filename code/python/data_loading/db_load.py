@@ -16,9 +16,7 @@ import aiohttp
 import tempfile
 import traceback
 from urllib.parse import urlparse
-
 from typing import List, Dict, Any, Tuple, Union, Optional
-
 from core.config import CONFIG
 from core.embedding import batch_get_embeddings
 from data_loading.db_load_utils import (
@@ -403,22 +401,22 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
         for index, row in df.iterrows():
             try:
                 row_data = row.to_dict()
-<<<<<<< HEAD
+                # 跳过 value 为空（None 或空字符串）的列
+                filtered_row_data = {k: v for k, v in row_data.items() if not pd.isna(v) and str(v).strip() != ''}
+                if not filtered_row_data:
+                    continue  # 整行都为空，跳过
                 # 尝试提取 url/id 字段
-=======
-                # ������ȡ url/id �ֶ�
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
-                url = None
+                url = ""
                 for col in ['url', 'URL', 'link', 'Link', 'id', 'ID', 'identifier']:
-                    if col in row_data and row_data[col]:
-                        url = str(row_data[col])
+                    if col in filtered_row_data and filtered_row_data[col]:
+                        url = str(filtered_row_data[col])
                         break
                 if not url:
                     url = f"xlsx:{os.path.basename(file_path)}:{index}"
 
 <<<<<<< HEAD
                 # 转为 JSON
-                json_data = json.dumps(row_data, ensure_ascii=False)
+                json_data = json.dumps(filtered_row_data, ensure_ascii=False)
 
                 # 尝试提取 name/title 字段
 =======
@@ -429,15 +427,15 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
 >>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
                 name = None
                 for col in ['name', 'Name', 'title', 'Title', 'heading', 'Heading']:
-                    if col in row_data and row_data[col]:
-                        name = str(row_data[col])
+                    if col in filtered_row_data and filtered_row_data[col]:
+                        name = str(filtered_row_data[col])
                         break
                 # 再模糊匹配（如 "Course Name", "Product Name" 等）
                 if not name:
                     for col in df.columns:
                         col_lc = col.lower().replace(" ", "")
-                        if ("name" in col_lc or "title" in col_lc) and row_data.get(col):
-                            name = str(row_data[col])
+                        if ("name" in col_lc or "title" in col_lc) and filtered_row_data.get(col):
+                            name = str(filtered_row_data[col])
                             break
                 if not name:
                     name = f"Row {index} from {os.path.basename(file_path)}"
@@ -1259,8 +1257,7 @@ async def main():
     parser.add_argument("--directory", action="store_true",
                         help="Treat the input file path as a directory containing files to process.")
     parser.add_argument("site", help="Site identifier")
-    parser.add_argument("file_path", nargs="?", help="Path to the input file or URL")
-    parser.add_argument("--batch-size", type=int, default=100,
+    parser.add_argument("--batch-size", type=int, default=50,
                         help="Batch size for processing and uploading")
     parser.add_argument("--database", type=str, default=None,
                         help="Specific database endpoint to use (from config_retrieval.yaml)")
