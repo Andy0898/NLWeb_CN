@@ -367,21 +367,12 @@ async def detect_file_type(file_path: str) -> Tuple[str, bool]:
 
 async def process_xlsx_file(file_path: str, site: str) -> list:
     """
-<<<<<<< HEAD
     处理 Excel 文件（.xlsx），转为文档对象列表
     Args:
         file_path: Excel 文件路径
         site: 站点标识
     Returns:
         文档对象列表
-=======
-    ���� Excel �ļ���.xlsx����תΪ�ĵ������б�
-    Args:
-        file_path: Excel �ļ�·��
-        site: վ���ʶ
-    Returns:
-        �ĵ������б�
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
     """
     print(f"Processing XLSX file: {file_path}")
     documents = []
@@ -389,11 +380,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
     success_count = 0
 
     try:
-<<<<<<< HEAD
         df = pd.read_excel(file_path, dtype=str)  # 读为字符串，避免类型问题
-=======
-        df = pd.read_excel(file_path, dtype=str)  # ��Ϊ�ַ�����������������
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
         if df.empty:
             print(f"Warning: XLSX file {file_path} is empty.")
             return documents
@@ -414,17 +401,10 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
                 if not url:
                     url = f"xlsx:{os.path.basename(file_path)}:{index}"
 
-<<<<<<< HEAD
                 # 转为 JSON
                 json_data = json.dumps(filtered_row_data, ensure_ascii=False)
 
                 # 尝试提取 name/title 字段
-=======
-                # תΪ JSON
-                json_data = json.dumps(row_data, ensure_ascii=False)
-
-                # ������ȡ name/title �ֶ�
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
                 name = None
                 for col in ['name', 'Name', 'title', 'Title', 'heading', 'Heading']:
                     if col in filtered_row_data and filtered_row_data[col]:
@@ -440,11 +420,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
                 if not name:
                     name = f"Row {index} from {os.path.basename(file_path)}"
 
-<<<<<<< HEAD
                 # 组装文档对象
-=======
-                # ��װ�ĵ�����
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
                 document = {
                     "id": str(hash(url) % (2**63)),
                     "schema_json": json_data,
@@ -468,11 +444,7 @@ async def process_xlsx_file(file_path: str, site: str) -> list:
 
     except Exception as e:
         print(f"Fatal error processing XLSX file: {str(e)}")
-<<<<<<< HEAD
         return documents
-=======
-        return documents 
->>>>>>> 28e85a3 (NLWeb 的代码结构发生巨大变化，所以重新组织了代码结构，并添加了 Qwen OpenAI 的 embedding 和 LLM 支持)
               
 async def process_csv_file(file_path: str, site: str) -> List[Dict[str, Any]]:
     """
