@@ -10,6 +10,7 @@ import os
 import sys
 import json
 import csv
+import pandas as pd
 import asyncio
 import aiohttp
 import tempfile
@@ -287,6 +288,8 @@ async def detect_file_type(file_path: str) -> Tuple[str, bool]:
         return 'json', has_embeddings
     elif ext == '.csv':
         return 'csv', has_embeddings
+    elif ext == '.xlsx':
+        return 'xlsx', has_embeddings
     elif ext in ['.xml', '.rss', '.atom']:
         # Check if file contains RSS-like elements
         try:
@@ -364,6 +367,87 @@ async def detect_file_type(file_path: str) -> Tuple[str, bool]:
     
     return 'unknown', has_embeddings
 
+async def process_xlsx_file(file_path: str, site: str) -> list:
+    """
+    Process Excel file(.xlsx), and convert the file content to document object.
+    Args:
+        file_path: Excel file path
+        site: site in Vector DB
+    Returns:
+        List of Document objects
+    """
+    print(f"Processing XLSX file: {file_path}")
+    documents = []
+    error_count = 0
+    success_count = 0
+
+    try:
+        df = pd.read_excel(file_path, dtype=str)  # 读为字符串，避免类型问题
+        if df.empty:
+            print(f"Warning: XLSX file {file_path} is empty.")
+            return documents
+
+        for index, row in df.iterrows():
+            try:
+                row_data = row.to_dict()
+                # ignore the column when the value of column is None or empty string
+                filtered_row_data = {k: v for k, v in row_data.items() if not pd.isna(v) and str(v).strip() != ''}
+                if not filtered_row_data:
+                    continue  # the row is empty, ignore
+                # try to fetch the value of url/id column
+                url = ""
+                for col in ['url', 'URL', 'link', 'Link', 'id', 'ID', 'identifier']:
+                    if col in filtered_row_data and filtered_row_data[col]:
+                        url = str(filtered_row_data[col])
+                        break
+                if not url:
+                    url = f"xlsx:{os.path.basename(file_path)}:{index}"
+
+                # convert to JSON
+                json_data = json.dumps(filtered_row_data, ensure_ascii=False)
+
+                # try to fetch the value of name/title column
+                name = None
+                for col in ['name', 'Name', 'title', 'Title', 'heading', 'Heading']:
+                    if col in filtered_row_data and filtered_row_data[col]:
+                        name = str(filtered_row_data[col])
+                        break
+                # Perform fuzzy matching with the column which contain substring "Name" such as "Course Name", "Product Name" etc.
+                if not name:
+                    for col in df.columns:
+                        col_lc = col.lower().replace(" ", "")
+                        if ("name" in col_lc or "title" in col_lc) and filtered_row_data.get(col):
+                            name = str(filtered_row_data[col])
+                            break
+                if not name:
+                    name = f"Row {index} from {os.path.basename(file_path)}"
+
+                # Assemble the document object
+                document = {
+                    "id": str(hash(url) % (2**63)),
+                    "schema_json": json_data,
+                    "url": url,
+                    "name": name,
+                    "site": site
+                }
+                documents.append(document)
+                success_count += 1
+
+                if (index + 1) % 1000 == 0:
+                    print(f"Processed {index + 1} rows ({success_count} successful, {error_count} errors)")
+
+            except Exception as row_error:
+                error_count += 1
+                print(f"Error processing row {index}: {str(row_error)}")
+                continue
+
+        print(f"XLSX processing complete: {success_count} rows processed successfully, {error_count} rows had errors")
+        return documents
+
+    except Exception as e:
+        print(f"Fatal error processing XLSX file: {str(e)}")
+        return documents
+              
 async def process_csv_file(file_path: str, site: str) -> List[Dict[str, Any]]:
     """
     Process a standard CSV file into document objects without using pandas.
@@ -793,6 +877,9 @@ async def loadJsonToDB(file_path: str, site: str, batch_size: int = 100, delete_
         if file_type == 'csv':
             # Process standard CSV file
             all_documents = await process_csv_file(resolved_path, site)
+        elif file_type == 'xlsx':
+            # Process standard CSV file
+            all_documents = await process_xlsx_file(resolved_path, site)
         elif file_type == 'rss' or (file_type == 'xml' and ('/feed' in original_path.lower() or '/rss' in original_path.lower())):
             # Process RSS/Atom feed
             print("Processing as RSS feed...")
@@ -1145,7 +1232,7 @@ async def main():
                         help="Treat the input file path as a directory containing files to process.")
     parser.add_argument("file_path", nargs="?", help="Path to the input file or URL or directory containing files to process")
     parser.add_argument("site", help="Site identifier")
-    parser.add_argument("--batch-size", type=int, default=100,
+    parser.add_argument("--batch-size", type=int, default=50,
                         help="Batch size for processing and uploading")
     parser.add_argument("--database", type=str, default=None,
                         help="Specific database endpoint to use (from config_retrieval.yaml)")
@@ -1197,4 +1284,15 @@ async def main():
     await process_normal_path(args.file_path, args.site, args.batch_size, args.delete_site, args.force_recompute, args.database)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except SystemExit as e:
+        # Argparse uses SystemExit, which is fine. We only worry about other exceptions.
+        if e.code != 0:
+            print(f"Execution stopped with exit code {e.code}.")
+    except KeyboardInterrupt:
+        print("\nProcess interrupted by user.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        traceback.print_exc()
+        sys.exit(1)

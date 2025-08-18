@@ -11,6 +11,7 @@ import threading
 import time
 import uuid
 import json
+import asyncio
 from typing import List, Dict, Union, Optional, Any, Tuple, Set
 
 from qdrant_client import AsyncQdrantClient
@@ -121,6 +122,9 @@ class QdrantVectorClient:
             params["url"] = url
             if api_key:
                 params["api_key"] = api_key
+            # Add timeout settings for remote connections
+            params["timeout"] = 60.0  # 60 seconds timeout
+            params["prefer_grpc"] = False  # Use HTTP instead of gRPC for better stability
         elif path:
             # Resolve relative paths for local file-based storage
             resolved_path = self._resolve_path(path)
@@ -426,31 +430,46 @@ class QdrantVectorClient:
                 ))
             
             if points:
-                # Upload in batches
-                batch_size = 100  # Smaller batch size for stability
+                # Upload in batches with retry mechanism
+                batch_size = 50  # Reduced batch size for better stability
                 total_uploaded = 0
+                max_retries = 3
                 
                 for i in range(0, len(points), batch_size):
                     batch = points[i:i+batch_size]
-                    try:
-                        await client.upsert(collection_name=collection_name, points=batch)
-                        total_uploaded += len(batch)
-                        logger.info(f"Uploaded batch of {len(batch)} points (total: {total_uploaded})")
-                    except Exception as e:
-                        logger.error(f"Error uploading batch: {str(e)}")
-                        # Try to create the collection if it doesn't exist
-                        if "Collection not found" in str(e):
-                            logger.info(f"Collection '{collection_name}' not found during upload. Creating it...")
-                            await client.create_collection(
-                                collection_name=collection_name,
-                                vectors_config=models.VectorParams(size=vector_size, distance=models.Distance.COSINE),
-                            )
-                            # Try upload again
+                    retry_count = 0
+                    uploaded = False
+                    
+                    while retry_count < max_retries and not uploaded:
+                        try:
                             await client.upsert(collection_name=collection_name, points=batch)
                             total_uploaded += len(batch)
-                            logger.info(f"Uploaded batch of {len(batch)} points after creating collection")
-                        else:
-                            raise
+                            logger.info(f"Uploaded batch of {len(batch)} points (total: {total_uploaded})")
+                            uploaded = True
+                        except Exception as e:
+                            retry_count += 1
+                            logger.warning(f"Error uploading batch (attempt {retry_count}/{max_retries}): {str(e)}")
+                            
+                            # Try to create the collection if it doesn't exist
+                            if "Collection not found" in str(e):
+                                logger.info(f"Collection '{collection_name}' not found during upload. Creating it...")
+                                await client.create_collection(
+                                    collection_name=collection_name,
+                                    vectors_config=models.VectorParams(size=vector_size, distance=models.Distance.COSINE),
+                                )
+                                # Try upload again
+                                await client.upsert(collection_name=collection_name, points=batch)
+                                total_uploaded += len(batch)
+                                logger.info(f"Uploaded batch of {len(batch)} points after creating collection")
+                                uploaded = True
+                            elif retry_count < max_retries:
+                                # Wait before retry (exponential backoff)
+                                wait_time = 2 ** retry_count
+                                logger.info(f"Waiting {wait_time} seconds before retry...")
+                                await asyncio.sleep(wait_time)
+                            else:
+                                logger.error(f"Failed to upload batch after {max_retries} attempts")
+                                raise
                 
                 logger.info(f"Successfully uploaded {total_uploaded} points to collection '{collection_name}'")
                 return total_uploaded
