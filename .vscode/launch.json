@@ -65,6 +65,19 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/code/python"
             }
+        },
+        {
+            "name": "Python Debugger: incrementalCrawlAndLoad with args",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scraping.incrementalCrawlAndLoad",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/code/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/code/python"
+            }
         }
     ]
 }
