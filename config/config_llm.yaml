@@ -66,8 +66,8 @@ endpoints:
       low: deepseek-coder-7b
 
   qwen_openai:
-    api_key_env: sk-8d92269162214b3da44e786fde398ae6
-    api_endpoint_env: https://dashscope.aliyuncs.com/compatible-mode/v1
+    api_key_env: ALIYUN_API_KEY
+    api_endpoint_env: ALIYUN_ENDPOINT
     llm_type: qwen_openai
     models:
       high: qwen-plus-latest
